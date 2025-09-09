@@ -1,0 +1,33 @@
+[build]
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/bug-report"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+
+# Redirect from root to function
+[[redirects]]
+  from = "/bug-report"
+  to = "/.netlify/functions/bug-report"
+  status = 200
+  force = true
+
+# Handle OPTIONS preflight
+[[redirects]]
+  from = "/bug-report"
+  to = "/.netlify/functions/bug-report"
+  status = 200
+  force = true
+  conditions = {Method = ["OPTIONS"]}
+
+# Catch-all redirect for the root
+[[redirects]]
+  from = "/"
+  to = "/.netlify/functions/bug-report"
+  status = 200
