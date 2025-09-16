@@ -4,12 +4,26 @@ exports.handler = async (event, context) => {
   console.log('Beta signup function called');
   console.log('HTTP Method:', event.httpMethod);
   
-  // Only allow POST requests
+  // Handle CORS preflight request
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      },
+      body: ''
+    };
+  }
+  
+  // Only allow POST requests (after OPTIONS)
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ error: 'Method Not Allowed' })
     };
@@ -26,6 +40,7 @@ exports.handler = async (event, context) => {
       statusCode: 400,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ error: 'Invalid request body' })
     };
@@ -40,6 +55,7 @@ exports.handler = async (event, context) => {
       statusCode: 400,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ error: 'Email and platform are required' })
     };
@@ -53,6 +69,7 @@ exports.handler = async (event, context) => {
       statusCode: 400,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ error: 'Invalid email address' })
     };
@@ -65,6 +82,7 @@ exports.handler = async (event, context) => {
       statusCode: 400,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ error: 'Invalid platform selection' })
     };
@@ -77,7 +95,6 @@ exports.handler = async (event, context) => {
     }
     
     console.log('Initializing Resend...');
-    // Initialize Resend with your API key
     const resend = new Resend(process.env.RESEND_API_KEY);
     console.log('Resend initialized successfully');
 
@@ -289,6 +306,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ 
         success: true, 
@@ -305,6 +323,7 @@ exports.handler = async (event, context) => {
       statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({ 
         error: 'Failed to process signup. Please try again or contact us directly at christiaantersteeg@gmail.com'
