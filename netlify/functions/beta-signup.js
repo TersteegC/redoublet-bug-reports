@@ -1,6 +1,9 @@
 const { Resend } = require('resend');
 
 exports.handler = async (event, context) => {
+  console.log('Beta signup function called');
+  console.log('HTTP Method:', event.httpMethod);
+  
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
@@ -16,7 +19,9 @@ exports.handler = async (event, context) => {
   let data;
   try {
     data = JSON.parse(event.body);
+    console.log('Parsed data:', data);
   } catch (error) {
+    console.error('Failed to parse body:', error);
     return {
       statusCode: 400,
       headers: {
@@ -30,6 +35,7 @@ exports.handler = async (event, context) => {
 
   // Validate input
   if (!email || !platform) {
+    console.error('Missing required fields:', { email: !!email, platform: !!platform });
     return {
       statusCode: 400,
       headers: {
@@ -42,6 +48,7 @@ exports.handler = async (event, context) => {
   // Basic email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
+    console.error('Invalid email format:', email);
     return {
       statusCode: 400,
       headers: {
@@ -53,6 +60,7 @@ exports.handler = async (event, context) => {
 
   // Validate platform
   if (!['ios', 'android'].includes(platform.toLowerCase())) {
+    console.error('Invalid platform:', platform);
     return {
       statusCode: 400,
       headers: {
@@ -62,19 +70,27 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Initialize Resend with your API key
-  const resend = new Resend(process.env.RESEND_API_KEY);
-
   try {
+    // Check if API key exists
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY not configured');
+    }
+    
+    console.log('Initializing Resend...');
+    // Initialize Resend with your API key
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    console.log('Resend initialized successfully');
+
     console.log('Attempting to send beta signup emails...');
     console.log('User email:', email);
     console.log('Platform:', platform);
+    console.log('Sending to:', process.env.TO_EMAIL || 'christiaantersteeg@gmail.com');
 
-    // Send notification email to you (using environment variables like bug-report.js)
+    // Send notification email to you
     const notificationEmail = await resend.emails.send({
       from: process.env.FROM_EMAIL || 'Redoublet Beta <onboarding@resend.dev>',
       to: [process.env.TO_EMAIL || 'christiaantersteeg@gmail.com'],
-      reply_to: email, // This allows you to reply directly to the user
+      reply_to: email,
       subject: `New Beta Tester Signup - ${platform.toUpperCase()}`,
       html: `
         <!DOCTYPE html>
@@ -281,23 +297,17 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('ERROR in beta signup function:', error.message);
+    console.error('Full error:', error);
+    console.error('Stack trace:', error.stack);
     
-    // Log more details for debugging
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      response: error.response
-    });
-
     return {
       statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        error: 'Failed to process signup. Please try again or contact us directly at christiaantersteeg@gmail.com',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: 'Failed to process signup. Please try again or contact us directly at christiaantersteeg@gmail.com'
       })
     };
   }
