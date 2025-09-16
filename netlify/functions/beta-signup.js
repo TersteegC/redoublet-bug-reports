@@ -66,10 +66,14 @@ exports.handler = async (event, context) => {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   try {
-    // Send notification email to you (using Resend's domain like your bug reports)
+    console.log('Attempting to send beta signup emails...');
+    console.log('User email:', email);
+    console.log('Platform:', platform);
+
+    // Send notification email to you (using environment variables like bug-report.js)
     const notificationEmail = await resend.emails.send({
-      from: 'Redoublet Beta <onboarding@resend.dev>', // Change this to match your bug report sender
-      to: ['christiaan.tersteeg@redoublet.com'], // You can add quirinus.tersteeg@redoublet.com here too
+      from: process.env.FROM_EMAIL || 'Redoublet Beta <onboarding@resend.dev>',
+      to: [process.env.TO_EMAIL || 'christiaantersteeg@gmail.com'],
       reply_to: email, // This allows you to reply directly to the user
       subject: `New Beta Tester Signup - ${platform.toUpperCase()}`,
       html: `
@@ -135,11 +139,13 @@ exports.handler = async (event, context) => {
       `
     });
 
+    console.log('Notification email sent successfully:', notificationEmail.id);
+
     // Send welcome email to the beta tester
     const welcomeEmail = await resend.emails.send({
-      from: 'Redoublet Beta <onboarding@resend.dev>', // Change this to match your bug report sender
+      from: process.env.FROM_EMAIL || 'Redoublet Beta <onboarding@resend.dev>',
       to: email,
-      reply_to: 'christiaan.tersteeg@redoublet.com', // They can reply to you
+      reply_to: process.env.REPLY_TO_EMAIL || 'christiaantersteeg@gmail.com',
       subject: 'Welcome to Redoublet Beta Program! 🎉',
       html: `
         <!DOCTYPE html>
@@ -260,10 +266,8 @@ exports.handler = async (event, context) => {
       `
     });
 
-    console.log('Emails sent successfully:', { 
-      notification: notificationEmail.id, 
-      welcome: welcomeEmail.id 
-    });
+    console.log('Welcome email sent successfully:', welcomeEmail.id);
+    console.log('Both emails sent successfully');
 
     return {
       statusCode: 200,
@@ -292,7 +296,7 @@ exports.handler = async (event, context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        error: 'Failed to process signup. Please try again or contact us directly at christiaan.tersteeg@redoublet.com',
+        error: 'Failed to process signup. Please try again or contact us directly at christiaantersteeg@gmail.com',
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       })
     };
