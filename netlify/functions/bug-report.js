@@ -141,10 +141,11 @@ exports.handler = async (event, context) => {
       </html>
     `;
 
-    // Send email via Resend
+    // Send email via Resend - USING RESEND'S DEFAULT DOMAIN
     const email = await resend.emails.send({
-      from: process.env.FROM_EMAIL || 'Bug Reports <bugs@redoublet.com>',
-      to: process.env.TO_EMAIL || 'support@redoublet.com',
+      from: process.env.FROM_EMAIL || 'Bug Reports <onboarding@resend.dev>',
+      to: process.env.TO_EMAIL || 'christiaantersteeg@gmail.com',
+      reply_to: process.env.REPLY_TO_EMAIL || 'christiaantersteeg@gmail.com',
       subject: `Bug Report - ${deviceInfo?.platform || 'Unknown Platform'} - ${userDescription ? userDescription.substring(0, 50) : 'No Description'}`,
       html: emailHtml,
       attachments: attachments,

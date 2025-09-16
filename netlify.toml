@@ -4,6 +4,23 @@
 [functions]
   node_bundler = "esbuild"
 
+# Global CORS headers for all functions
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Accept"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+
+# Specific headers for the bug-report function endpoint
+[[headers]]
+  for = "/.netlify/functions/bug-report"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+
+# Headers for the convenience route
 [[headers]]
   for = "/bug-report"
   [headers.values]
@@ -11,14 +28,14 @@
     Access-Control-Allow-Headers = "Content-Type"
     Access-Control-Allow-Methods = "POST, OPTIONS"
 
-# Redirect from root to function
+# Redirect from convenience route to actual function
 [[redirects]]
   from = "/bug-report"
   to = "/.netlify/functions/bug-report"
   status = 200
   force = true
 
-# Handle OPTIONS preflight
+# Handle OPTIONS preflight for convenience route
 [[redirects]]
   from = "/bug-report"
   to = "/.netlify/functions/bug-report"
@@ -26,7 +43,7 @@
   force = true
   conditions = {Method = ["OPTIONS"]}
 
-# Catch-all redirect for the root
+# Redirect root to function (optional - remove if you want a different homepage)
 [[redirects]]
   from = "/"
   to = "/.netlify/functions/bug-report"
